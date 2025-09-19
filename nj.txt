@@ -1,0 +1,43 @@
+import os
+import tkinter as tk
+from tkinter import messagebox
+
+# Define the common path to the Fortnite PAK folder
+# Adjust this path if your installation is in a different location
+FORTNITE_PATH = r"C:\Program Files\Epic Games\Fortnite\FortniteGame\Content"
+
+# Construct the path to global.utoc
+utoc_file_path = os.path.join(FORTNITE_PATH, 'global.utoc')
+
+def zero_out_from_offset():
+    global utoc_file_path
+    if not os.path.isfile(utoc_file_path):
+        messagebox.showerror("Error", f"global.utoc not found at:\n{utoc_file_path}")
+        return
+    try:
+        with open(utoc_file_path, 'rb+') as file:
+            file.seek(0, 2)  # move to end
+            file_size = file.tell()
+            offset = 1503
+            if offset >= file_size:
+                messagebox.showinfo("Info", "Offset is beyond or at the end of the file.")
+                return
+            remaining_size = file_size - offset
+            file.seek(offset)
+            file.write(b'\x00' * remaining_size)
+        messagebox.showinfo("Success", "Bytes from offset 1503 to end have been zeroed out.")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+# GUI setup
+root = tk.Tk()
+root.title("Fortnite global.utoc Zero Out")
+root.geometry("400x150")
+
+label = tk.Label(root, text=f"Target file:\n{utoc_file_path}")
+label.pack(pady=10)
+
+zero_button = tk.Button(root, text="Zero Out from Offset 1503", command=zero_out_from_offset)
+zero_button.pack(pady=10)
+
+root.mainloop()
